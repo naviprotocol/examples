@@ -15,6 +15,10 @@ export class SuiTools {
         this.sui = new SuiClient();
     }
 
+    /**
+     *
+     * @param address your sui wallet
+     */
     async getHealthFactor(address: string) {
         const result = await this.sui.moveInspect(`${config.ProtocolPackage}::logic::user_health_factor`, [
             '0x06', // clock object id
@@ -26,9 +30,7 @@ export class SuiTools {
         console.log('your health factor is: ', healthFactor.toString());
     }
 
-    async main() {
-        await this.getHealthFactor('YOUR_SUI_WALLET');
-    }
+    async main() {}
 }
 
 new SuiTools().main();
