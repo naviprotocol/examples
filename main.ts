@@ -63,9 +63,28 @@ export class SuiTools {
         console.log('Transaction URL(deposit): ', txUrl);
     }
 
+    async withdraw(withdrawAmount: string, recipient: string, _pool: PoolConfig) {
+        const txUrl = await this.sui.moveCall(
+            `${config.ProtocolPackage}::lending::withdraw`,
+            [
+                '0x06', // clock object id
+                config.PriceOracle, // The object id of the price oracle
+                config.StorageId, // Object id of storage
+                _pool.poolId, // pool id of the sui asset
+                _pool.assetId, // the id of the sui asset in the protocol
+                withdrawAmount, // The amount you want to withdraw
+                recipient, // The recipient of withdraw amounts
+                config.Incentive, // The object id of the incentive
+            ],
+            [_pool.type]
+        );
+        console.log('Transaction URL(withdraw): ', txUrl);
+    }
+
     async main() {
         // await this.getHealthFactor('YOUR_SUI_WALLET_ADDRESS');
         // await this.deposit('YOUR_COIN_OBJECT_ID', '100000000', pool.sui);
+        // await this.withdraw('10000000', 'RECIPIENT_ADDRESS', pool.sui);
     }
 }
 
