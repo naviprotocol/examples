@@ -1,5 +1,6 @@
 export interface Pool {
     sui: PoolConfig;
+    usdc: PoolConfig;
 }
 
 export interface PoolConfig {

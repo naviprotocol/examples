@@ -16,6 +16,11 @@ const pool: Pool = {
         poolId: '0x96df0fce3c471489f4debaaa762cf960b3d97820bd1f3f025ff8190730e958c5',
         type: '0x2::sui::SUI',
     },
+    usdc: {
+        assetId: 1,
+        poolId: '0xa02a98f9c88db51c6f5efaaf2261c81f34dd56d86073387e0ef1805ca22e39c8',
+        type: '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN',
+    },
 };
 
 export class SuiTools {
@@ -63,6 +68,12 @@ export class SuiTools {
         console.log('Transaction URL(deposit): ', txUrl);
     }
 
+    /**
+     *
+     * @param withdrawAmount The amount you want to withdraw, carrying decimals. such as you want to withdraw 1sui, you need type 1000000000
+     * @param recipient The recipient of withdraw amounts
+     * @param _pool Which token type do you want to withdraw
+     */
     async withdraw(withdrawAmount: string, recipient: string, _pool: PoolConfig) {
         const txUrl = await this.sui.moveCall(
             `${config.ProtocolPackage}::lending::withdraw`,
@@ -76,15 +87,37 @@ export class SuiTools {
                 recipient, // The recipient of withdraw amounts
                 config.Incentive, // The object id of the incentive
             ],
-            [_pool.type]
+            [_pool.type] // type arguments, for this just the coin type
         );
         console.log('Transaction URL(withdraw): ', txUrl);
+    }
+
+    /**
+     *
+     * @param borrowAmount The amount you want to borrow, carrying decimals. such as you want to borrow 1sui, you need type 1000000000
+     * @param _pool Which token type do you want to borrow
+     */
+    async borrow(borrowAmount: string, _pool: PoolConfig) {
+        const txUrl = await this.sui.moveCall(
+            `${config.ProtocolPackage}::lending::borrow`,
+            [
+                '0x06', // clock object id
+                config.PriceOracle, // The object id of the price oracle
+                config.StorageId, // Object id of storage
+                _pool.poolId, // pool id of the sui asset
+                _pool.assetId, // The id of the sui asset in the protocol
+                borrowAmount, // The amount you want to borrow
+            ],
+            [_pool.type] // type arguments, for this just the coin type
+        );
+        console.log('Transaction URL(borrow): ', txUrl);
     }
 
     async main() {
         // await this.getHealthFactor('YOUR_SUI_WALLET_ADDRESS');
         // await this.deposit('YOUR_COIN_OBJECT_ID', '100000000', pool.sui);
         // await this.withdraw('10000000', 'RECIPIENT_ADDRESS', pool.sui);
+        // await this.borrow('10000', pool.usdc);
     }
 }
 
