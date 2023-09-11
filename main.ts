@@ -211,6 +211,13 @@ export class SuiTools {
         parseResult(result);
     }
 
+    /**
+     *
+     * @param address your wallet address
+     * @param reserve reserve cofnig
+     * The user's wallet balance will be fetched via dynamic object.
+     * The resulting value needs to be divided by 1e9
+     */
     async getUserBorrowAndSupplyBalanceByReserve(address: string, reserve: PoolConfig) {
         const borrowBalance: any = await this.sui.provider.getDynamicFieldObject({ parentId: reserve.borrowBalanceParentId, name: { type: 'address', value: address } });
         console.log(`Your ${reserve.name} borrow balance is: ${borrowBalance.data?.content?.fields.value}`);
