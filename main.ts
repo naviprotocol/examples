@@ -136,12 +136,42 @@ export class SuiTools {
         console.log('Transaction URL(borrow): ', txUrl);
     }
 
+    /**
+     *
+     * @param debtCoin The object id of the coin, which relates to the type of debt of the liquidated user
+     * @param liquidateUser Liquidated users, only users with health factor of less than 1(move type is 1e27) will be liquidated
+     * @param liquidateAmount Liquidation amounts, the maximum value is usually the largest amount of debt being liquidated.
+     * @param _debtPool Types of debts of the liquidated user
+     * @param _collateralPool Types of collateral of the liquidated user
+     */
+    async liquidation_call(debtCoin: string, liquidateUser: string, liquidateAmount: string, _debtPool: PoolConfig, _collateralPool: PoolConfig) {
+        const txUrl = await this.sui.moveCall(
+            `${config.ProtocolPackage}::lending::liquidation_call`,
+            [
+                '0x06', // clock object id
+                config.PriceOracle, // The object id of the price oracle
+                config.StorageId, // Object id of storage
+                _debtPool.assetId, // The id of the debt asset in the protocol
+                _debtPool.poolId, // pool id of the debt asset
+                _collateralPool.assetId, // The id of the collateral asset in the protocol
+                _collateralPool.poolId, // pool id of the collateral asset
+                debtCoin, // the object id of the debt token you own.
+                liquidateUser, // Users with abnormal status(users about to be liquidated)
+                liquidateAmount, // Maximum 35% of total borrowing, as configured
+                config.Incentive, // The object id of the incentive
+            ],
+            [_debtPool.type, _collateralPool.type]
+        );
+        console.log('Transaction URL(borrow): ', txUrl);
+    }
+
     async main() {
         // await this.getHealthFactor('YOUR_SUI_WALLET_ADDRESS');
         // await this.deposit('YOUR_COIN_OBJECT_ID', '100000000', pool.sui);
         // await this.withdraw('10000000', 'RECIPIENT_ADDRESS', pool.sui);
         // await this.borrow('10000', pool.usdc);
         // await this.repay('YOUR_COIN_OBJECT_ID', '10000', pool.usdc);
+        // await this.liquidation_call('YOUR_COIN_OBJECT_ID', 'LIQUIDATE_USER', 'LIQUIDAT_AMOUNT', pool.sui, pool.usdc);
     }
 }
 
