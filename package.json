@@ -16,6 +16,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@mysten/sui.js": "^0.36.0"
+    "@mysten/sui.js": "^0.36.0",
+    "bignumber.js": "^9.1.2"
   }
 }
