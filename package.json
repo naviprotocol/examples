@@ -1,0 +1,9 @@
+{
+  "name": "examples",
+  "version": "1.0.0",
+  "main": "main.ts",
+  "repository": "git@github.com:naviprotocol/examples.git",
+  "author": "NaviProtocolL <lin@naviprotocol.io>",
+  "license": "MIT",
+  "private": false
+}
