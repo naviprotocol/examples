@@ -57,8 +57,8 @@ export class SuiTools {
             [
                 '0x06', // clock object id
                 config.StorageId, // object id of storage
-                _pool.poolId, // pool id of the sui asset
-                _pool.assetId, // the id of the sui asset in the protocol
+                _pool.poolId, // pool id of the asset
+                _pool.assetId, // the id of the asset in the protocol
                 coinObject, // the object id of the token you own.
                 amount, // The amount you want to deposit, decimals must be carried, like 1 sui => 1000000000
                 config.Incentive,
@@ -81,8 +81,8 @@ export class SuiTools {
                 '0x06', // clock object id
                 config.PriceOracle, // The object id of the price oracle
                 config.StorageId, // Object id of storage
-                _pool.poolId, // pool id of the sui asset
-                _pool.assetId, // the id of the sui asset in the protocol
+                _pool.poolId, // pool id of the asset
+                _pool.assetId, // the id of the asset in the protocol
                 withdrawAmount, // The amount you want to withdraw
                 recipient, // The recipient of withdraw amounts
                 config.Incentive, // The object id of the incentive
@@ -104,9 +104,32 @@ export class SuiTools {
                 '0x06', // clock object id
                 config.PriceOracle, // The object id of the price oracle
                 config.StorageId, // Object id of storage
-                _pool.poolId, // pool id of the sui asset
-                _pool.assetId, // The id of the sui asset in the protocol
+                _pool.poolId, // pool id of the asset
+                _pool.assetId, // The id of the asset in the protocol
                 borrowAmount, // The amount you want to borrow
+            ],
+            [_pool.type] // type arguments, for this just the coin type
+        );
+        console.log('Transaction URL(borrow): ', txUrl);
+    }
+
+    /**
+     *
+     * @param coinObject Coin object Id, usually this is related to the pool. When you choose to deposit sui, you need to find the object id of the sui coin you own
+     * @param amount The amount you want to repay, carrying decimals. such as you want to repay 1sui, you need type 1000000000
+     * @param _pool Which token type do you want to repay
+     */
+    async repay(coinObject: string, amount: string, _pool: PoolConfig) {
+        const txUrl = await this.sui.moveCall(
+            `${config.ProtocolPackage}::lending::repay`,
+            [
+                '0x06', // clock object id
+                config.PriceOracle, // The object id of the price oracle
+                config.StorageId, // Object id of storage
+                _pool.poolId, // pool id of the asset
+                _pool.assetId, // The id of the asset in the protocol
+                coinObject, // the object id of the token you own.
+                amount, // The amount you want to repay
             ],
             [_pool.type] // type arguments, for this just the coin type
         );
@@ -118,6 +141,7 @@ export class SuiTools {
         // await this.deposit('YOUR_COIN_OBJECT_ID', '100000000', pool.sui);
         // await this.withdraw('10000000', 'RECIPIENT_ADDRESS', pool.sui);
         // await this.borrow('10000', pool.usdc);
+        // await this.repay('YOUR_COIN_OBJECT_ID', '10000', pool.usdc);
     }
 }
 
