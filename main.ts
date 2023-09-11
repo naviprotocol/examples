@@ -226,6 +226,12 @@ export class SuiTools {
         console.log(`Your ${reserve.name} supply balance is: ${supplyBalance.data?.content?.fields.value}`);
     }
 
+    async getUserAssetIdList(address: string) {
+        const result = await this.sui.moveInspect(`${config.ProtocolPackage}::storage::get_user_assets`, [config.StorageId, address]);
+        console.log(`The list of assets id you deposited: `, result[0]);
+        console.log(`The list of assets id you borrowed: `, result[1]);
+    }
+
     async main() {
         // await this.getHealthFactor('YOUR_SUI_WALLET_ADDRESS');
         // await this.deposit('YOUR_COIN_OBJECT_ID', '100000000', pool.sui);
@@ -236,6 +242,7 @@ export class SuiTools {
         // await this.getReserves();
         // await this.getReserveDetailById(pool.weth.assetId);
         // await this.getUserBorrowAndSupplyBalanceByReserve('YOUR_SUI_WALLET_ADDRESS', pool.sui);
+        // await this.getUserAssetIdList('YOUR_SUI_WALLET_ADDRESS');
     }
 }
 
