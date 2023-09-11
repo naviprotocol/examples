@@ -1,11 +1,21 @@
+import { Pool, PoolConfig } from './src/interfaces/types';
 import { SuiClient } from './src/sui-client';
 import BigNumber from 'bignumber.js';
 
 const config = {
     ProtocolPackage: '0xd92bc457b42d48924087ea3f22d35fd2fe9afdf5bdfe38cc51c0f14f3282f6d5',
     StorageId: '0xbb4e2f4b6205c2e2a2db47aeb4f830796ec7c005f88537ee775986639bc442fe',
+    Incentive: '0xaaf735bf83ff564e1b219a0d644de894ef5bdc4b2250b126b2a46dd002331821',
 
     PriceOracle: '0x1568865ed9a0b5ec414220e8f79b3d04c77acc82358f6e5ae4635687392ffbef',
+};
+
+const pool: Pool = {
+    sui: {
+        assetId: 0,
+        poolId: '0x96df0fce3c471489f4debaaa762cf960b3d97820bd1f3f025ff8190730e958c5',
+        type: '0x2::sui::SUI',
+    },
 };
 
 export class SuiTools {
@@ -30,7 +40,33 @@ export class SuiTools {
         console.log('your health factor is: ', healthFactor.toString());
     }
 
-    async main() {}
+    /**
+     *
+     * @param coinObject Coin object Id, usually this is related to the pool. When you choose to deposit sui, you need to find the object id of the sui coin you own
+     * @param amount The amount you want to deposit, carrying decimals. such as you want to deposit 1sui, you need type 1000000000
+     * @param _pool Which token type do you want to deposit
+     */
+    async deposit(coinObject: string, amount: string, _pool: PoolConfig) {
+        const txUrl = await this.sui.moveCall(
+            `${config.ProtocolPackage}::lending::deposit`,
+            [
+                '0x06', // clock object id
+                config.StorageId, // object id of storage
+                _pool.poolId, // pool id of the sui asset
+                _pool.assetId, // the id of the sui asset in the protocol
+                coinObject, // the object id of the token you own.
+                amount, // The amount you want to deposit, decimals must be carried, like 1 sui => 1000000000
+                config.Incentive,
+            ],
+            [_pool.type] // type arguments, for this just the coin type
+        );
+        console.log('Transaction URL(deposit): ', txUrl);
+    }
+
+    async main() {
+        // await this.getHealthFactor('YOUR_SUI_WALLET_ADDRESS');
+        // await this.deposit('YOUR_COIN_OBJECT_ID', '100000000', pool.sui);
+    }
 }
 
 new SuiTools().main();
