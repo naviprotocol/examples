@@ -5,5 +5,17 @@
   "repository": "git@github.com:naviprotocol/examples.git",
   "author": "NaviProtocolL <lin@naviprotocol.io>",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "scripts": {
+    "start": "ts-node main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.6.0",
+    "dotenv": "^16.3.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@mysten/sui.js": "^0.36.0"
+  }
 }
