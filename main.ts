@@ -232,6 +232,41 @@ export class SuiTools {
         console.log(`The list of assets id you borrowed: `, result[1]);
     }
 
+    /**
+     *
+     * @param assetId the asset id, you can get it from getReserves() function
+     * It is possible to get the percentage of use of an asset, totalBorrow / totalSupply
+     */
+    async getUtilizationByAssetId(assetId: number) {
+        const result = await this.sui.moveInspect(`${config.ProtocolPackage}::calculator::caculate_utilization`, [config.StorageId, assetId]);
+        const utilization = new BigNumber(result[0]).div(1e27).multipliedBy(100).toString();
+        console.log(`The utilization is: ${utilization}%`);
+    }
+
+    /**
+     *
+     * @param assetId the asset id, you can get it from getReserves() function
+     * It is possible to get the borrow rate.
+     */
+    async getBorrowRate(assetId: number) {
+        const result = await this.sui.moveInspect(`${config.ProtocolPackage}::calculator::calculate_borrow_rate`, [config.StorageId, assetId]);
+        const borrowRate = new BigNumber(result[0]).div(1e27).multipliedBy(100).toString();
+        console.log(`The borrow APY is: ${borrowRate}%`);
+        return result[0];
+    }
+
+    /**
+     *
+     * @param assetId the asset id, you can get it from getReserves() function
+     * @param borrowRate the borrow rate, you can get it from getBorrowRate() function
+     * It is possible to get the supply rate
+     */
+    async getSupplyRate(assetId: number, borrowRate: string) {
+        const result = await this.sui.moveInspect(`${config.ProtocolPackage}::calculator::calculate_supply_rate`, [config.StorageId, assetId, borrowRate]);
+        const supplyRate = new BigNumber(result[0]).div(1e27).multipliedBy(100).toString();
+        console.log(`The supply APY is: ${supplyRate}%`);
+    }
+
     async main() {
         // await this.getHealthFactor('YOUR_SUI_WALLET_ADDRESS');
         // await this.deposit('YOUR_COIN_OBJECT_ID', '100000000', pool.sui);
@@ -243,6 +278,9 @@ export class SuiTools {
         // await this.getReserveDetailById(pool.weth.assetId);
         // await this.getUserBorrowAndSupplyBalanceByReserve('YOUR_SUI_WALLET_ADDRESS', pool.sui);
         // await this.getUserAssetIdList('YOUR_SUI_WALLET_ADDRESS');
+        // await this.getUtilizationByAssetId(pool.sui.assetId);
+        // const borrowRate = await this.getBorrowRate(pool.sui.assetId);
+        // await this.getSupplyRate(pool.sui.assetId, borrowRate);
     }
 }
 
