@@ -72,12 +72,13 @@ export class SuiClient {
      * @param data Inspect Result
      * @returns
      */
-    async inspectResultParseAndPrint(data: DevInspectResults): Promise<any[]> {
+    async inspectResultParseAndPrint(data: DevInspectResults, parseType?: string): Promise<any[]> {
         if (data.results && data.results.length > 0) {
             if (data.results[0].returnValues && data.results[0].returnValues.length > 0) {
                 let values: any[] = [];
                 for (let v of data.results[0].returnValues) {
-                    let result = bcs.de(v[1], Uint8Array.from(v[0]), 'hex');
+                    const _type = parseType ? parseType : v[1];
+                    let result = bcs.de(_type, Uint8Array.from(v[0]));
                     values.push(result);
                 }
                 return values;
@@ -163,12 +164,12 @@ export class SuiClient {
      * @param tx Sui transaction
      * @returns Transactions sent results
      */
-    async moveInspectImpl(tx: TransactionBlock): Promise<any[]> {
+    async moveInspectImpl(tx: TransactionBlock, parseType?: string): Promise<any[]> {
         const result = await this.provider.devInspectTransactionBlock({
             transactionBlock: tx,
             sender: this.address(),
         });
-        return this.inspectResultParseAndPrint(result);
+        return this.inspectResultParseAndPrint(result, parseType);
     }
 
     /**
@@ -177,7 +178,7 @@ export class SuiClient {
      * @param args The function Args
      * @param typeArgs The function Type Args
      */
-    async moveInspect(target: `${string}::${string}::${string}`, args: any[], typeArgs?: string[]): Promise<any[]> {
+    async moveInspect(target: `${string}::${string}::${string}`, args: any[], typeArgs?: string[], parseType?: string): Promise<any[]> {
         const tx = new TransactionBlock();
 
         const args_: {
@@ -196,7 +197,7 @@ export class SuiClient {
             arguments: args_,
             typeArguments: typeArgs,
         });
-        return await this.moveInspectImpl(tx);
+        return await this.moveInspectImpl(tx, parseType);
     }
 
     private async getObjectParseAndPrint(result: SuiObjectResponse) {

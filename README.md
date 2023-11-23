@@ -12,6 +12,9 @@
     FULL_NODE=""
     ```
 -   ### The function entry is [main.ts](https://github.com/naviprotocol/examples/blob/main/main.ts#L178), Select the method you want to call and modify the parameters. And then, launch it
+
     ```
     $ yarn start
     ```
+
+-   ### If you just want to query some pools about incentives v2, you can run: `npx ts-node ui_getter.ts`

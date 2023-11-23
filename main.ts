@@ -2,16 +2,18 @@ import { Pool, PoolConfig } from './src/interfaces/types';
 import { SuiClient } from './src/sui-client';
 import BigNumber from 'bignumber.js';
 
-const config = {
-    ProtocolPackage: '0xd92bc457b42d48924087ea3f22d35fd2fe9afdf5bdfe38cc51c0f14f3282f6d5',
+// **Mainnet**
+export const config = {
+    ProtocolPackage: '0xe66f07e2a8d9cf793da1e0bca98ff312b3ffba57228d97cf23a0613fddf31b65',
     StorageId: '0xbb4e2f4b6205c2e2a2db47aeb4f830796ec7c005f88537ee775986639bc442fe',
     Incentive: '0xaaf735bf83ff564e1b219a0d644de894ef5bdc4b2250b126b2a46dd002331821',
+    IncentiveV2: '0xf87a8acb8b81d14307894d12595541a73f19933f88e1326d5be349c7a6f7559c', // The new incentive version: V2
 
     PriceOracle: '0x1568865ed9a0b5ec414220e8f79b3d04c77acc82358f6e5ae4635687392ffbef',
     ReserveParentId: '0xe6d4c6610b86ce7735ea754596d71d72d10c7980b5052fc3c8cdf8d09fea9b4b', // get it from storage object id. storage.reserves
 };
 
-const pool: Pool = {
+export const pool: Pool = {
     sui: {
         name: 'SUI',
         assetId: 0,
@@ -77,6 +79,8 @@ export class SuiTools {
      * @param coinObject Coin object Id, usually this is related to the pool. When you choose to deposit sui, you need to find the object id of the sui coin you own
      * @param amount The amount you want to deposit, carrying decimals. such as you want to deposit 1sui, you need type 1000000000
      * @param _pool Which token type do you want to deposit
+     *
+     * @deprecated the contract logic has been set to abort 0, Use `depositV2` instead.
      */
     async deposit(coinObject: string, amount: string, _pool: PoolConfig) {
         const txUrl = await this.sui.moveCall(
@@ -97,9 +101,36 @@ export class SuiTools {
 
     /**
      *
+     * @param coinObject Coin object Id, usually this is related to the pool. When you choose to deposit sui, you need to find the object id of the sui coin you own
+     * @param amount The amount you want to deposit, carrying decimals. such as you want to deposit 1sui, you need type 1000000000
+     * @param _pool Which token type do you want to deposit
+     *
+     */
+    async depositV2(coinObject: string, amount: string, _pool: PoolConfig) {
+        const txUrl = await this.sui.moveCall(
+            `${config.ProtocolPackage}::incentive_v2::entry_deposit`,
+            [
+                '0x06', // clock object id
+                config.StorageId, // object id of storage
+                _pool.poolId, // pool id of the asset
+                _pool.assetId, // the id of the asset in the protocol
+                coinObject, // the object id of the token you own.
+                amount, // The amount you want to deposit, decimals must be carried, like 1 sui => 1000000000
+                config.Incentive,
+                config.IncentiveV2, // The incentive object v2
+            ],
+            [_pool.type] // type arguments, for this just the coin type
+        );
+        console.log('Transaction URL(entry_deposit): ', txUrl);
+    }
+
+    /**
+     *
      * @param withdrawAmount The amount you want to withdraw, carrying decimals. such as you want to withdraw 1sui, you need type 1000000000
      * @param recipient The recipient of withdraw amounts
      * @param _pool Which token type do you want to withdraw
+     *
+     * @deprecated the contract logic has been set to abort 0, Use `withdrawV2` instead.
      */
     async withdraw(withdrawAmount: string, recipient: string, _pool: PoolConfig) {
         const txUrl = await this.sui.moveCall(
@@ -121,8 +152,34 @@ export class SuiTools {
 
     /**
      *
+     * @param withdrawAmount The amount you want to withdraw, carrying decimals. such as you want to withdraw 1sui, you need type 1000000000
+     * @param _pool Which token type do you want to withdraw
+     *
+     */
+    async withdrawV2(withdrawAmount: string, _pool: PoolConfig) {
+        const txUrl = await this.sui.moveCall(
+            `${config.ProtocolPackage}::incentive_v2::entry_withdraw`,
+            [
+                '0x06', // clock object id
+                config.PriceOracle, // The object id of the price oracle
+                config.StorageId, // Object id of storage
+                _pool.poolId, // pool id of the asset
+                _pool.assetId, // the id of the asset in the protocol
+                withdrawAmount, // The amount you want to withdraw
+                config.Incentive, // The object id of the incentive
+                config.IncentiveV2, // The incentive object v2
+            ],
+            [_pool.type] // type arguments, for this just the coin type
+        );
+        console.log('Transaction URL(entry_withdraw): ', txUrl);
+    }
+
+    /**
+     *
      * @param borrowAmount The amount you want to borrow, carrying decimals. such as you want to borrow 1sui, you need type 1000000000
      * @param _pool Which token type do you want to borrow
+     *
+     * @deprecated the contract logic has been set to abort 0, Use `borrowV2` instead.
      */
     async borrow(borrowAmount: string, _pool: PoolConfig) {
         const txUrl = await this.sui.moveCall(
@@ -142,9 +199,33 @@ export class SuiTools {
 
     /**
      *
+     * @param borrowAmount The amount you want to borrow, carrying decimals. such as you want to borrow 1sui, you need type 1000000000
+     * @param _pool Which token type do you want to borrow
+     */
+    async borrowV2(borrowAmount: string, _pool: PoolConfig) {
+        const txUrl = await this.sui.moveCall(
+            `${config.ProtocolPackage}::incentive_v2::entry_borrow`,
+            [
+                '0x06', // clock object id
+                config.PriceOracle, // The object id of the price oracle
+                config.StorageId, // Object id of storage
+                _pool.poolId, // pool id of the asset
+                _pool.assetId, // The id of the asset in the protocol
+                borrowAmount, // The amount you want to borrow
+                config.IncentiveV2, // The incentive object v2
+            ],
+            [_pool.type] // type arguments, for this just the coin type
+        );
+        console.log('Transaction URL(entry_borrow): ', txUrl);
+    }
+
+    /**
+     *
      * @param coinObject Coin object Id, usually this is related to the pool. When you choose to deposit sui, you need to find the object id of the sui coin you own
      * @param amount The amount you want to repay, carrying decimals. such as you want to repay 1sui, you need type 1000000000
      * @param _pool Which token type do you want to repay
+     *
+     * @deprecated the contract logic has been set to abort 0, Use `repayV2` instead.
      */
     async repay(coinObject: string, amount: string, _pool: PoolConfig) {
         const txUrl = await this.sui.moveCall(
@@ -160,7 +241,31 @@ export class SuiTools {
             ],
             [_pool.type] // type arguments, for this just the coin type
         );
-        console.log('Transaction URL(borrow): ', txUrl);
+        console.log('Transaction URL(repay): ', txUrl);
+    }
+
+    /**
+     *
+     * @param coinObject Coin object Id, usually this is related to the pool. When you choose to deposit sui, you need to find the object id of the sui coin you own
+     * @param amount The amount you want to repay, carrying decimals. such as you want to repay 1sui, you need type 1000000000
+     * @param _pool Which token type do you want to repay
+     */
+    async repayV2(coinObject: string, amount: string, _pool: PoolConfig) {
+        const txUrl = await this.sui.moveCall(
+            `${config.ProtocolPackage}::incentive_v2::entry_repay`,
+            [
+                '0x06', // clock object id
+                config.PriceOracle, // The object id of the price oracle
+                config.StorageId, // Object id of storage
+                _pool.poolId, // pool id of the asset
+                _pool.assetId, // The id of the asset in the protocol
+                coinObject, // the object id of the token you own.
+                amount, // The amount you want to repay
+                config.IncentiveV2, // The incentive object v2
+            ],
+            [_pool.type] // type arguments, for this just the coin type
+        );
+        console.log('Transaction URL(entry_repay): ', txUrl);
     }
 
     /**
@@ -170,6 +275,8 @@ export class SuiTools {
      * @param liquidateAmount Liquidation amounts, the maximum value is usually the largest amount of debt being liquidated.
      * @param _debtPool Types of debts of the liquidated user
      * @param _collateralPool Types of collateral of the liquidated user
+     *
+     * @deprecated the contract logic has been set to abort 0, Use `liquidationV2` instead.
      */
     async liquidation_call(debtCoin: string, liquidateUser: string, liquidateAmount: string, _debtPool: PoolConfig, _collateralPool: PoolConfig) {
         const txUrl = await this.sui.moveCall(
@@ -189,7 +296,37 @@ export class SuiTools {
             ],
             [_debtPool.type, _collateralPool.type]
         );
-        console.log('Transaction URL(borrow): ', txUrl);
+        console.log('Transaction URL(liquidation_call): ', txUrl);
+    }
+
+    /**
+     *
+     * @param debtCoin The object id of the coin, which relates to the type of debt of the liquidated user
+     * @param liquidateUser Liquidated users, only users with health factor of less than 1(move type is 1e27) will be liquidated
+     * @param liquidateAmount Liquidation amounts, the maximum value is usually the largest amount of debt being liquidated.
+     * @param _debtPool Types of debts of the liquidated user
+     * @param _collateralPool Types of collateral of the liquidated user
+     */
+    async liquidationV2(debtCoin: string, liquidateUser: string, liquidateAmount: string, _debtPool: PoolConfig, _collateralPool: PoolConfig) {
+        const txUrl = await this.sui.moveCall(
+            `${config.ProtocolPackage}::incentive_v2::entry_liquidation`,
+            [
+                '0x06', // clock object id
+                config.PriceOracle, // The object id of the price oracle
+                config.StorageId, // Object id of storage
+                _debtPool.assetId, // The id of the debt asset in the protocol
+                _debtPool.poolId, // pool id of the debt asset
+                debtCoin, // the object id of the debt token you own.
+                _collateralPool.assetId, // The id of the collateral asset in the protocol
+                _collateralPool.poolId, // pool id of the collateral asset
+                liquidateUser, // Users with abnormal status(users about to be liquidated)
+                liquidateAmount, // Maximum 35% of total borrowing, as configured
+                config.Incentive, // The object id of the incentive
+                config.IncentiveV2, // The incentive object v2
+            ],
+            [_debtPool.type, _collateralPool.type]
+        );
+        console.log('Transaction URL(entry_liquidation): ', txUrl);
     }
 
     /**
@@ -268,12 +405,22 @@ export class SuiTools {
     }
 
     async main() {
-        // await this.getHealthFactor('YOUR_SUI_WALLET_ADDRESS');
+        /** Deprecated Functions: V1 */
         // await this.deposit('YOUR_COIN_OBJECT_ID', '100000000', pool.sui);
         // await this.withdraw('10000000', 'RECIPIENT_ADDRESS', pool.sui);
         // await this.borrow('10000', pool.usdc);
         // await this.repay('YOUR_COIN_OBJECT_ID', '10000', pool.usdc);
         // await this.liquidation_call('YOUR_COIN_OBJECT_ID', 'LIQUIDATE_USER', 'LIQUIDAT_AMOUNT', pool.sui, pool.usdc);
+
+        /** Active Functions */
+        // await this.depositV2('YOUR_COIN_OBJECT_ID', '100000000', pool.sui);
+        // await this.withdrawV2('10000000', pool.sui);
+        // await this.borrowV2('10000', pool.usdc);
+        // await this.repayV2('YOUR_COIN_OBJECT_ID', '10000', pool.usdc);
+        // await this.liquidationV2('YOUR_COIN_OBJECT_ID', 'LIQUIDATE_USER', 'LIQUIDAT_AMOUNT', pool.sui, pool.usdc);
+
+        /** Protocol Getter */
+        // await this.getHealthFactor('YOUR_SUI_WALLET_ADDRESS');
         // await this.getReserves();
         // await this.getReserveDetailById(pool.weth.assetId);
         // await this.getUserBorrowAndSupplyBalanceByReserve('YOUR_SUI_WALLET_ADDRESS', pool.sui);
