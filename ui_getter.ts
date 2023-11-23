@@ -123,7 +123,7 @@ export class UIGetter {
         // await this.getIncentiveAPY(OptionType.OptionSupply); // get the current incentive apy of all supply pools, provide the option type and get the apy, should be div 1e27
         // await this.getIncentivePoolsGroupByPhase(PoolStatus.All, OptionType.OptionSupply); // get the pool aggregated by phase based on status
 
-        await this.getUserState('0x11965c381a4e46174fd4f7fae498339c941cc8e536a18d9fcde2a13f5419b2c4');
+        await this.getUserState('YOUR_ADDRESS');
     }
 }
 
