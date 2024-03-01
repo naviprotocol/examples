@@ -3,6 +3,10 @@ export interface Pool {
     usdc: PoolConfig;
     usdt: PoolConfig;
     weth: PoolConfig;
+    cetus: PoolConfig;
+    voloSui: PoolConfig;
+    haSui: PoolConfig;
+    navx: PoolConfig;
 }
 
 export interface PoolConfig {
