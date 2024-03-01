@@ -119,7 +119,7 @@ export class UIGetter {
             [], // type arguments is null
             'vector<IncentiveAPYInfo>' // parse type
         );
-        console.log('The Incentive APY: ', result);
+        console.log('The Incentive APY: ', JSON.stringify(result, null, 2));
     }
 
     async getIncentivePoolsGroupByPhase(status: PoolStatus, option: OptionType, user?: string) {
