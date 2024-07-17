@@ -3,7 +3,7 @@ import { SuiClient } from './src/sui-client';
 import { config, pool } from './main';
 
 const uiConfig = {
-    Package: '0x1ee4061d3c78d6244b5f32eb4011d081e52f5f4b484ca4a84de48b1146a779f7',
+    Package: '0x7975c3b265af884a3f174f68ac9cf2605900dbb508ed6d1f52fa8064bc6e634a',
 };
 
 enum OptionType {
